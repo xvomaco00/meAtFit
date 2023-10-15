@@ -17,6 +17,13 @@
 #define MAX_LINE_LENGTH 100
 #define ASCII_LENGTH 128
 
+#define ERROR_NO_ARGUMENTS 1
+#define ERROR_TOO_MANY_ARGUMENTS 2
+#define ERROR_TOO_LONG_USER_INPUT 3
+#define ERROR_EMPTY_ADDRESS 4
+#define ERROR_TOO_LONG_ADDRESS 5
+#define ERROR_NO_ADDRESSES 6
+
 bool matches(const char* userInput, const char* storedAddress);
 int parse_address(int lineIndex, const char* storedAddress);
 int parse_args(int argc, char *argv[]);
@@ -106,7 +113,7 @@ int parse_args(int argc, char **argv) {
 
         fprintf(stderr, "ERROR: unexpected arguments provided.\n");
 
-        return 1;
+        return ERROR_NO_ARGUMENTS;
     }
 
     if (argc > 2) {
@@ -114,7 +121,7 @@ int parse_args(int argc, char **argv) {
         fprintf(stderr, "ERROR: too many arguments provided.\n");
         fprintf(stderr, "Usage: %s [input] <text-file\n", argv[0]);
 
-        return 2;
+        return ERROR_TOO_MANY_ARGUMENTS;
     }
 
     if (argc == 2 && strlen(argv[1]) > MAX_LINE_LENGTH) {
@@ -122,7 +129,7 @@ int parse_args(int argc, char **argv) {
         fprintf(stderr, "ERROR: invalid arguments provided.\n");
         fprintf(stderr, "The input can not exceed 100 characters.\n");
 
-        return 3;
+        return ERROR_TOO_LONG_USER_INPUT;
     }
 
     return 0;
@@ -148,7 +155,7 @@ int parse_address(int lineIndex, const char* storedAddress) {
         fprintf(stderr, "ERROR: invalid data found on line number %d.\n", lineIndex);
         fprintf(stderr, "The line does not contain any characters.\n");
 
-        return 4;
+        return ERROR_EMPTY_ADDRESS;
     }
 
     if (lineLength > MAX_LINE_LENGTH) {
@@ -156,7 +163,7 @@ int parse_address(int lineIndex, const char* storedAddress) {
         fprintf(stderr, "ERROR: invalid data found on line number %d.\n", lineIndex);
         fprintf(stderr, "A line can contain a maximum of 100 characters.\n");
 
-        return 5;
+        return ERROR_TOO_LONG_ADDRESS;
     }
 
     return 0;
@@ -327,7 +334,7 @@ int main(int argc, char *argv[]) {
 
         fprintf(stderr, "ERROR: provided address book is empty.\n");
 
-        return 6;
+        return ERROR_NO_ADDRESSES;
     }
 
     //*************

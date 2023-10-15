@@ -199,48 +199,38 @@ void sort(char *strToSort) {
 
     unsigned strLen = strlen(strToSort);
 
-    for (unsigned i = 0; i < strLen - 1; ++i) {
+    for (unsigned fromStartIndex = 0; fromStartIndex < strLen - 1; ++fromStartIndex) {
 
         char smallestChar = ASCII_LENGTH - 1;
         unsigned smallestIndex;
 
-        for (unsigned j = 0; j < strLen - i; ++j) {
+        for (unsigned comparingIndex = 0; comparingIndex < strLen - fromStartIndex; ++comparingIndex) {
 
-            if (strToSort[i + j] < smallestChar) {
+            if (strToSort[fromStartIndex + comparingIndex] < smallestChar) {
 
-                smallestChar = strToSort[i + j];
-                smallestIndex = i + j;
+                smallestChar = strToSort[fromStartIndex + comparingIndex];
+                smallestIndex = fromStartIndex + comparingIndex;
             }
         }
 
         if (smallestIndex) {
 
-            char originalChar = strToSort[i];
+            char originalChar = strToSort[fromStartIndex];
 
-            strToSort[i] = smallestChar;
+            strToSort[fromStartIndex] = smallestChar;
             strToSort[smallestIndex] = originalChar;
         }
     }
 }
 
-//*******************************
-// The main logic of the program.
-//*******************************
-
 int main(int argc, char *argv[]) {
 
-    //****************************************
-    // Parse and check the provided arguments.
-    //****************************************
-
-    /** Parse result code. */
     int parseResultCode = parse_args(argc, argv);
     if (parseResultCode != 0) {
 
         return parseResultCode;
     }
 
-    /** The user input. If no input is provided, userInput = "". */
     char *userInput;
 
     if (argc == 2) {
@@ -257,22 +247,11 @@ int main(int argc, char *argv[]) {
 
     to_upper(userInput);
 
-    /** Array for storing allowed symbols. */
     char allowedSymbols[ASCII_LENGTH] = "";
-
-    /** String for the found / matched address. */
     char matchedAddress[LINE_BUFFER_LENGTH];
-
-    /** Buffer for storing current line of file. */
     char currentLine[LINE_BUFFER_LENGTH];
-
-    /** Integer representing current line number of file. */
     int lineIndex = 0;
-
-    /** Integer representing number of found / matched addresses. */
     int foundNum = 0;
-
-    /** Integer representing length of found / matched addresses. */
     unsigned foundLen = 0;
 
     //***********************************************************
@@ -290,20 +269,11 @@ int main(int argc, char *argv[]) {
         trim(currentLine);
         to_upper(currentLine);
 
-        //**********************************
-        // Parse and check the current line.
-        //**********************************
-
         parseResultCode = parse_address(lineIndex, currentLine);
         if (parseResultCode != 0) {
 
             return parseResultCode;
         }
-
-        //****************************************************
-        // Check, if user input is substring of current line.
-        // If not, skip current iteration and check next line.
-        //****************************************************
 
         if (!matches(userInput, currentLine)) {
 
@@ -333,8 +303,6 @@ int main(int argc, char *argv[]) {
         //*****************************************************
         // If the user input length equals current line length,
         // there is no need to store the continuing character.
-        // The matched / found address is safely stored, and
-        // we can simply continue to the next loop iteration.
         //*****************************************************
 
         if (userInputLen == currentLineLen) {
@@ -355,10 +323,12 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    //*****************
-    // ↑ End of loop. ↑
-    //*****************
+    if (!lineIndex) {
 
+        fprintf(stderr, "ERROR: provided address book is empty.\n");
+
+        return 6;
+    }
 
     //*************
     //

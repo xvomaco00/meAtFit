@@ -1,10 +1,7 @@
 /**
  * @file keyfilter.c
- *
  * @brief Implementation of virtual keyboard filtering in car dashboard navigation.
- *
  * @author Ondřej Vomáčka (xvomaco00)
- *
  * @date 10/10/2023
  */
 
@@ -13,9 +10,9 @@
 #include <stdbool.h>
 #include <ctype.h>
 
-#define LINE_BUFFER_LENGTH 128
+#define PRINTABLE_ASCII_LENGTH 128
+#define LINE_BUFFER_LENGTH 110
 #define MAX_LINE_LENGTH 100
-#define ASCII_LENGTH 128
 
 #define ERROR_NO_ARGUMENTS 1
 #define ERROR_TOO_MANY_ARGUMENTS 2
@@ -23,13 +20,6 @@
 #define ERROR_EMPTY_ADDRESS 4
 #define ERROR_TOO_LONG_ADDRESS 5
 #define ERROR_NO_ADDRESSES 6
-
-bool matches(const char* userInput, const char* storedAddress);
-int parse_address(int lineIndex, const char* storedAddress);
-int parse_args(int argc, char *argv[]);
-void to_upper(char *strToUpper);
-void trim(char *strToTrim);
-void sort(char *strToSort);
 
 /**
  * @brief Trims the whitespace at the beginning and end of string.
@@ -60,7 +50,7 @@ void trim(char *strToTrim) {
         actualStart++;
     }
 
-    if (actualStart == actualEnd) {
+    if (actualStart == len) {
 
         strToTrim[0] = '\0';
         return;
@@ -139,7 +129,7 @@ int parse_args(int argc, char **argv) {
  * @brief Check whether the stored address is valid.
  *
  * @param lineIndex The index of the line where the address is stored in the file.
- *                  Used purely for error printing.
+ *                  Used purely for error messages.
  * @param storedAddress The stored address parsed from the file.
  *
  * @return 0, if the address is valid.
@@ -198,39 +188,27 @@ bool matches(const char* userInput, const char* storedAddress) {
 }
 
 /**
- * @brief Sorts the characters of string in alphabetical order.
+ * @brief Prints the allowed characters from the corresponding character map.
  *
- * @param strToSort The string to be sorted.
+ * @param charMap The symbols / characters to be printed.
  */
-void sort(char *strToSort) {
+void print_allowed_chars(const bool* charMap) {
 
-    unsigned strLen = strlen(strToSort);
+    for (int charIndex = 0; charIndex < PRINTABLE_ASCII_LENGTH; ++charIndex) {
+        if (charMap[charIndex]) {
 
-    for (unsigned fromStartIndex = 0; fromStartIndex < strLen - 1; ++fromStartIndex) {
-
-        char smallestChar = ASCII_LENGTH - 1;
-        unsigned smallestIndex;
-
-        for (unsigned comparingIndex = 0; comparingIndex < strLen - fromStartIndex; ++comparingIndex) {
-
-            if (strToSort[fromStartIndex + comparingIndex] < smallestChar) {
-
-                smallestChar = strToSort[fromStartIndex + comparingIndex];
-                smallestIndex = fromStartIndex + comparingIndex;
-            }
-        }
-
-        if (smallestIndex) {
-
-            char originalChar = strToSort[fromStartIndex];
-
-            strToSort[fromStartIndex] = smallestChar;
-            strToSort[smallestIndex] = originalChar;
+            printf("%c", charIndex);
         }
     }
+
+    printf("\n");
 }
 
 int main(int argc, char *argv[]) {
+
+    //**************************************
+    // Parse & check the provided arguments.
+    //**************************************
 
     int parseResultCode = parse_args(argc, argv);
     if (parseResultCode != 0) {
@@ -238,14 +216,13 @@ int main(int argc, char *argv[]) {
         return parseResultCode;
     }
 
-    char *userInput;
+    char *userInput = "";
+    unsigned userInputLen = 0;
 
     if (argc == 2) {
 
         userInput = argv[1];
-    } else {
-
-        userInput = "";
+        userInputLen = strlen(userInput);
     }
 
     //******************************************************
@@ -254,25 +231,24 @@ int main(int argc, char *argv[]) {
 
     to_upper(userInput);
 
-    char allowedSymbols[ASCII_LENGTH] = "";
-    char matchedAddress[LINE_BUFFER_LENGTH];
+    //******************************************************************
+    // The ASCII characters are sorted in alphabetical order, so we take
+    // advantage of this and store the allowed characters in the map.
+    //******************************************************************
+
+    bool charMap[PRINTABLE_ASCII_LENGTH] = {false};
+    char matchedAddress[LINE_BUFFER_LENGTH] = "";
     char currentLine[LINE_BUFFER_LENGTH];
     int lineIndex = 0;
     int foundNum = 0;
-    unsigned foundLen = 0;
 
-    //***********************************************************
-    // Enter loop iterating over the lines of the file until EOF.
-    //***********************************************************
+    //**********************************************
+    // Iterate over the lines of the file until EOF.
+    //**********************************************
 
     while (fgets(currentLine, LINE_BUFFER_LENGTH, stdin) != NULL) {
 
         lineIndex++;
-
-        //******************************************************************
-        // Trim and convert current line to uppercase for later comparisons.
-        //******************************************************************
-
         trim(currentLine);
         to_upper(currentLine);
 
@@ -292,62 +268,51 @@ int main(int argc, char *argv[]) {
         // condition, but then it would unnecessarily store each match.
         //*************************************************************
 
-        if (foundNum == 0) {
+        if (!foundNum) {
 
             strcpy(matchedAddress, currentLine);
         }
 
-        unsigned currentLineLen = strlen(currentLine);
+        //*********************************************************
+        // If user input length equals current line length, we can
+        // not store continuing character, because there is none.
+        // Also, if current line equals the matched address, we can
+        // not increment foundNum, because the logic would break.
+        //*********************************************************
 
-        if (currentLineLen != foundLen) {
-
-            foundNum++;
-        }
-
-        foundLen = currentLineLen;
-        unsigned userInputLen = strlen(userInput);
-
-        //*****************************************************
-        // If the user input length equals current line length,
-        // there is no need to store the continuing character.
-        //*****************************************************
-
-        if (userInputLen == currentLineLen) {
+        if (foundNum && (userInputLen == strlen(currentLine) || strcmp(matchedAddress, currentLine) == 0)) {
 
             continue;
         }
 
-        char charToAdd = (char)toupper(currentLine[userInputLen]);
+        foundNum++;
 
-        //*************************************************************
-        // Finally, if the continuing character is not already stored,
-        // we append it to the end of allowedSymbols[] using strncat().
-        //*************************************************************
+        //***********************************************************
+        // If continuing character is printable (interval <32, 126>),
+        // we can enable the index corresponding to the character.
+        //***********************************************************
 
-        if (strchr(allowedSymbols, charToAdd) == NULL) {
+        int charToAdd = toupper(currentLine[userInputLen]);
+        if (' ' <= charToAdd && charToAdd <= '~') {
 
-            strncat(allowedSymbols, &charToAdd, 1);
+            charMap[charToAdd] = true;
         }
     }
 
     if (!lineIndex) {
 
-        fprintf(stderr, "ERROR: provided address book is empty.\n");
+        fprintf(stderr, "ERROR: the provided address book is empty.\n");
 
         return ERROR_NO_ADDRESSES;
     }
-
-    //*************
-    //
-    //*************
 
     if (foundNum == 1) {
 
         printf("Found: %s\n", matchedAddress);
     } else if (foundNum) {
 
-        sort(allowedSymbols);
-        printf("Enable: %s\n", allowedSymbols);
+        printf("Enable: ");
+        print_allowed_chars(charMap);
     } else {
 
         printf("Not found\n");

@@ -17,9 +17,7 @@
 #define ERROR_NO_ARGUMENTS 1
 #define ERROR_TOO_MANY_ARGUMENTS 2
 #define ERROR_TOO_LONG_USER_INPUT 3
-#define ERROR_EMPTY_ADDRESS 4
-#define ERROR_TOO_LONG_ADDRESS 5
-#define ERROR_NO_ADDRESSES 6
+#define ERROR_TOO_LONG_ADDRESS 4
 
 /**
  * @brief Trims the whitespace at the beginning and end of string.
@@ -121,40 +119,6 @@ int parse_args(int argc, char **argv) {
 }
 
 /**
- * @brief Check whether the stored address is valid.
- *
- * @param lineIndex The index of the line where the address is stored in the file.
- *                  Used purely for error messages.
- * @param storedAddress The stored address parsed from the file.
- *
- * @return 0, if the address is valid.
- * @return 4, if the address is empty.
- * @return 5, if the address exceeds 100 characters.
- */
-int parse_address(int lineIndex, const char* storedAddress) {
-
-    unsigned lineLength = strlen(storedAddress);
-
-    if (lineLength == 0) {
-
-        fprintf(stderr, "ERROR: invalid data found on line number %d.\n", lineIndex);
-        fprintf(stderr, "The line does not contain any characters.\n");
-
-        return ERROR_EMPTY_ADDRESS;
-    }
-
-    if (lineLength > MAX_LINE_LENGTH) {
-
-        fprintf(stderr, "ERROR: invalid data found on line number %d.\n", lineIndex);
-        fprintf(stderr, "A line can contain a maximum of 100 characters.\n");
-
-        return ERROR_TOO_LONG_ADDRESS;
-    }
-
-    return 0;
-}
-
-/**
  * @brief Checks whether the first characters of userInput match the first
  *        characters of storedAddress.
  *
@@ -247,10 +211,14 @@ int main(int argc, char *argv[]) {
         trim(currentLine);
         to_upper(currentLine);
 
-        parseResultCode = parse_address(lineIndex, currentLine);
-        if (parseResultCode != 0) {
+        unsigned currentLineLen = strlen(currentLine);
 
-            return parseResultCode;
+        if (currentLineLen > MAX_LINE_LENGTH) {
+
+            fprintf(stderr, "ERROR: invalid data found on line number %d.\n", lineIndex);
+            fprintf(stderr, "A line can contain a maximum of 100 characters.\n");
+
+            return ERROR_TOO_LONG_ADDRESS;
         }
 
         if (!matches(userInput, currentLine)) {
@@ -292,13 +260,6 @@ int main(int argc, char *argv[]) {
 
             charMap[charToAdd] = true;
         }
-    }
-
-    if (!lineIndex) {
-
-        fprintf(stderr, "ERROR: the provided address book is empty.\n");
-
-        return ERROR_NO_ADDRESSES;
     }
 
     if (foundNum == 1) {

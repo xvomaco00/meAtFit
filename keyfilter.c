@@ -221,7 +221,7 @@ int main(int argc, char *argv[]) {
             return ERROR_TOO_LONG_ADDRESS;
         }
 
-        if (!matches(userInput, currentLine)) {
+        if (!matches(userInput, currentLine) || !currentLineLen) {
 
             continue;
         }
@@ -243,7 +243,7 @@ int main(int argc, char *argv[]) {
         // not increment foundNum, because the logic would break.
         //*********************************************************
 
-        if (foundNum && (userInputLen == strlen(currentLine) || strcmp(matchedAddress, currentLine) == 0)) {
+        if (foundNum && (userInputLen == currentLineLen || strcmp(matchedAddress, currentLine) == 0)) {
 
             continue;
         }

@@ -30,11 +30,6 @@
  */
 void trim(char *strToTrim) {
 
-    if (strToTrim == NULL) {
-
-        return;
-    }
-
     unsigned len = strlen(strToTrim);
 
     if (len == 0) {
@@ -231,10 +226,10 @@ int main(int argc, char *argv[]) {
 
     to_upper(userInput);
 
-    //******************************************************************
-    // The ASCII characters are sorted in alphabetical order, so we take
-    // advantage of this and store the allowed characters in the map.
-    //******************************************************************
+    //****************************************************************
+    // The ASCII characters are sorted in alphabetical order, so we
+    // take advantage of this and store the allowed characters in map.
+    //****************************************************************
 
     bool charMap[PRINTABLE_ASCII_LENGTH] = {false};
     char matchedAddress[LINE_BUFFER_LENGTH] = "";

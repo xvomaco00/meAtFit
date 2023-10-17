@@ -166,6 +166,10 @@ int main(int argc, char *argv[]) {
 
         lineIndex++;
 
+        //*********************************************
+        // Remove newline character at the end of line.
+        //*********************************************
+
         currentLine[strcspn(currentLine, "\n")] = 0;
 
         to_upper(currentLine);

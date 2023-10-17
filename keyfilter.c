@@ -20,51 +20,6 @@
 #define ERROR_TOO_LONG_ADDRESS 4
 
 /**
- * @brief Trims the whitespace at the beginning and end of string.
- *
- * @note Usage not necessary, but can prevent some parsing problems.
- *
- * @param strToTrim The string to be trimmed.
- */
-void trim(char *strToTrim) {
-
-    unsigned len = strlen(strToTrim);
-
-    if (len == 0) {
-
-        return;
-    }
-
-    unsigned actualStart = 0;
-    unsigned actualEnd = len - 1;
-
-    while (actualStart <= actualEnd && isspace(strToTrim[actualStart])) {
-
-        actualStart++;
-    }
-
-    if (actualStart == len) {
-
-        strToTrim[0] = '\0';
-        return;
-    }
-
-    while (actualEnd >= actualStart && isspace(strToTrim[actualEnd])) {
-
-        actualEnd--;
-    }
-
-    int offset = 0;
-    while (actualStart + offset <= actualEnd) {
-
-        strToTrim[offset] = strToTrim[actualStart + offset];
-        offset++;
-    }
-
-    strToTrim[offset] = '\0';
-}
-
-/**
  * @brief Converts string characters to uppercase.
  *
  * @param strToUpper The string to be converted.
@@ -208,7 +163,9 @@ int main(int argc, char *argv[]) {
     while (fgets(currentLine, LINE_BUFFER_LENGTH, stdin) != NULL) {
 
         lineIndex++;
-        trim(currentLine);
+
+        currentLine[strcspn(currentLine, "\n")] = 0;
+
         to_upper(currentLine);
 
         unsigned currentLineLen = strlen(currentLine);

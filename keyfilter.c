@@ -3,6 +3,8 @@
  * @brief Implementation of virtual keyboard filtering in car dashboard navigation.
  * @author Ondřej Vomáčka (xvomaco00)
  * @date 10/10/2023
+ *
+ * @note First IZP project with stream processing / premium functionality.
  */
 
 #include <stdio.h>
@@ -207,13 +209,13 @@ int main(int argc, char *argv[]) {
 
         foundNum++;
 
-        //***********************************************************
-        // If continuing character is printable (interval <32, 126>),
-        // we can enable the index corresponding to the character.
-        //***********************************************************
+        //*************************************************
+        // If the continuing character is printable, we can
+        // enable the index corresponding to the character.
+        //*************************************************
 
         int charToAdd = toupper(currentLine[userInputLen]);
-        if (' ' <= charToAdd && charToAdd <= '~') {
+        if (charToAdd < PRINTABLE_ASCII_LENGTH) {
 
             charMap[charToAdd] = true;
         }

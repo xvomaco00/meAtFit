@@ -8,12 +8,12 @@
  */
 
 #include <stdio.h>
+#include <ctype.h>
 #include <string.h>
 #include <stdbool.h>
-#include <ctype.h>
 
 #define PRINTABLE_ASCII_LENGTH 128
-#define LINE_BUFFER_LENGTH 110
+#define LINE_BUFFER_SIZE 104 // The buffer needs to be a little bigger, because each line ends with \n. (+ \r)
 #define MAX_LINE_LENGTH 100
 
 #define ERROR_NO_ARGUMENTS 1
@@ -25,12 +25,11 @@
  * @brief Converts string characters to uppercase.
  *
  * @param strToUpper The string to be converted.
+ * @param strLength The length of given string.
  */
-void to_upper(char *strToUpper) {
+void to_upper(char *strToUpper, unsigned strLength) {
 
-    unsigned len = strlen(strToUpper);
-
-    for (unsigned charIndex = 0; charIndex < len; ++charIndex) {
+    for (unsigned charIndex = 0; charIndex < strLength; ++charIndex) {
 
         strToUpper[charIndex] = (char)toupper(strToUpper[charIndex]);
     }
@@ -47,7 +46,7 @@ void to_upper(char *strToUpper) {
  * @return 2, if too many arguments are provided.
  * @return 3, if the address exceeds 100 characters.
  */
-int parse_args(int argc, char **argv) {
+int check_args(int argc, char **argv) {
 
     if (argc == 0) {
 
@@ -80,20 +79,20 @@ int parse_args(int argc, char **argv) {
  *        characters of storedAddress.
  *
  * @param userInput The user input parsed from arguments.
+ * @param userInputLen The length of given user input.
  * @param storedAddress The stored address parsed from file.
+ * @param storedAddressLen The length of given stored address.
  *
  * @return A bool.
  */
-bool matches(const char* userInput, const char* storedAddress) {
+bool matches(const char* userInput, unsigned userInputLen, const char* storedAddress, unsigned storedAddressLen) {
 
-    unsigned inputLen = strlen(userInput);
-
-    if (inputLen > strlen(storedAddress)) {
+    if (userInputLen > storedAddressLen) {
 
         return false;
     }
 
-    for (unsigned charIndex = 0; charIndex < inputLen; ++charIndex) {
+    for (unsigned charIndex = 0; charIndex < userInputLen; ++charIndex) {
         if (storedAddress[charIndex] != userInput[charIndex]) {
 
             return false;
@@ -126,10 +125,10 @@ int main(int argc, char *argv[]) {
     // Parse & check the provided arguments.
     //**************************************
 
-    int parseResultCode = parse_args(argc, argv);
-    if (parseResultCode != 0) {
+    int checkResultCode = check_args(argc, argv);
+    if (checkResultCode != 0) {
 
-        return parseResultCode;
+        return checkResultCode;
     }
 
     char *userInput = "";
@@ -145,7 +144,7 @@ int main(int argc, char *argv[]) {
     // Convert the input to uppercase for later comparisons.
     //******************************************************
 
-    to_upper(userInput);
+    to_upper(userInput, userInputLen);
 
     //****************************************************************
     // The ASCII characters are sorted in alphabetical order, so we
@@ -153,8 +152,8 @@ int main(int argc, char *argv[]) {
     //****************************************************************
 
     bool charMap[PRINTABLE_ASCII_LENGTH] = {false};
-    char matchedAddress[LINE_BUFFER_LENGTH] = "";
-    char currentLine[LINE_BUFFER_LENGTH];
+    char matchedAddress[LINE_BUFFER_SIZE] = "";
+    char currentLine[LINE_BUFFER_SIZE];
     int lineIndex = 0;
     int foundNum = 0;
 
@@ -162,7 +161,7 @@ int main(int argc, char *argv[]) {
     // Iterate over the lines of the file until EOF.
     //**********************************************
 
-    while (fgets(currentLine, LINE_BUFFER_LENGTH, stdin) != NULL) {
+    while (fgets(currentLine, LINE_BUFFER_SIZE, stdin) != NULL) {
 
         lineIndex++;
 
@@ -171,10 +170,11 @@ int main(int argc, char *argv[]) {
         //*********************************************
 
         currentLine[strcspn(currentLine, "\n")] = 0;
-
-        to_upper(currentLine);
+        currentLine[strcspn(currentLine, "\r")] = 0;
 
         unsigned currentLineLen = strlen(currentLine);
+
+        to_upper(currentLine, currentLineLen);
 
         if (currentLineLen > MAX_LINE_LENGTH) {
 
@@ -184,7 +184,7 @@ int main(int argc, char *argv[]) {
             return ERROR_TOO_LONG_ADDRESS;
         }
 
-        if (!matches(userInput, currentLine) || !currentLineLen) {
+        if (!matches(userInput, userInputLen, currentLine, currentLineLen) || !currentLineLen) {
 
             continue;
         }

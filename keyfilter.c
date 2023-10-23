@@ -13,7 +13,7 @@
 #include <stdbool.h>
 
 #define PRINTABLE_ASCII_LENGTH 128
-#define LINE_BUFFER_SIZE 104 // The buffer needs to be a little bigger, because each line ends with \n. (+ \r)
+#define LINE_BUFFER_SIZE 104 // The buffer needs to be a bit bigger, because each line ends with \n. (+ \r)
 #define MAX_LINE_LENGTH 100
 
 #define ERROR_NO_ARGUMENTS 1
@@ -48,6 +48,7 @@ void to_upper(char *strToUpper, unsigned strLength) {
  */
 int check_args(int argc, char **argv) {
 
+    // Just a sanity check, normally this should not happen.
     if (argc == 0) {
 
         fprintf(stderr, "ERROR: unexpected arguments provided.\n");
@@ -224,6 +225,10 @@ int main(int argc, char *argv[]) {
             charMap[charToAdd] = true;
         }
     }
+
+    //******************
+    // Print the result.
+    //******************
 
     if (foundNum == 1) {
 

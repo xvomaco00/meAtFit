@@ -185,6 +185,11 @@ int main(int argc, char *argv[]) {
             return ERROR_TOO_LONG_ADDRESS;
         }
 
+        //***************************************************
+        // If the userInput is not substring, or the line is
+        // empty, we can continue to the next loop iteration.
+        //***************************************************
+
         if (!matches(userInput, userInputLen, currentLine, currentLineLen) || !currentLineLen) {
 
             continue;

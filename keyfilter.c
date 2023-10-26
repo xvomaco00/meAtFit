@@ -170,12 +170,13 @@ int main(int argc, char *argv[]) {
         // Remove newline character at the end of line.
         //*********************************************
 
-        unsigned newlineIndex = strcspn(currentLine, "\n");
+        unsigned rIndex = strcspn(currentLine, "\r");
+        unsigned nIndex = strcspn(currentLine, "\n");
 
-        if (newlineIndex < LINE_BUFFER_SIZE) {
+        if (nIndex < LINE_BUFFER_SIZE && rIndex < LINE_BUFFER_SIZE) {
 
-            currentLine[newlineIndex] = 0;
-            currentLine[strcspn(currentLine, "\r")] = 0;
+            currentLine[rIndex] = 0;
+            currentLine[nIndex] = 0;
         }
 
         unsigned currentLineLen = strlen(currentLine);

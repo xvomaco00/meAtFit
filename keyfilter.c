@@ -175,10 +175,7 @@ int main(int argc, char *argv[]) {
         if (newlineIndex < LINE_BUFFER_SIZE) {
 
             currentLine[newlineIndex] = 0;
-
-#ifdef _WIN32
             currentLine[strcspn(currentLine, "\r")] = 0;
-#endif
         }
 
         unsigned currentLineLen = strlen(currentLine);

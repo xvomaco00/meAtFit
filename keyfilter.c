@@ -13,7 +13,7 @@
 #include <stdbool.h>
 
 #define PRINTABLE_ASCII_LENGTH 128
-#define LINE_BUFFER_SIZE 104 // The buffer needs to be a bit bigger, because each line ends with \n. (+ \r)
+#define LINE_BUFFER_SIZE 104 // The buffer needs to be a bit bigger, because each line ends with \n & \0. (+ \r)
 #define MAX_LINE_LENGTH 100
 
 #define ERROR_NO_ARGUMENTS 1
@@ -155,6 +155,7 @@ int main(int argc, char *argv[]) {
     bool charMap[PRINTABLE_ASCII_LENGTH] = {false};
     char matchedAddress[LINE_BUFFER_SIZE] = "";
     char currentLine[LINE_BUFFER_SIZE];
+    unsigned matchedAddressLen = 0;
     int lineIndex = 0;
     int foundNum = 0;
 
@@ -170,14 +171,8 @@ int main(int argc, char *argv[]) {
         // Remove newline character at the end of line.
         //*********************************************
 
-        unsigned rIndex = strcspn(currentLine, "\r");
-        unsigned nIndex = strcspn(currentLine, "\n");
-
-        if (nIndex < LINE_BUFFER_SIZE && rIndex < LINE_BUFFER_SIZE) {
-
-            currentLine[rIndex] = 0;
-            currentLine[nIndex] = 0;
-        }
+        currentLine[strcspn(currentLine, "\r")] = 0;
+        currentLine[strcspn(currentLine, "\n")] = 0;
 
         unsigned currentLineLen = strlen(currentLine);
 
@@ -209,6 +204,7 @@ int main(int argc, char *argv[]) {
         if (!foundNum) {
 
             strcpy(matchedAddress, currentLine);
+            matchedAddressLen = strlen(currentLine);
         }
 
         //*********************************************************
@@ -218,7 +214,7 @@ int main(int argc, char *argv[]) {
         // not increment foundNum, because the logic would break.
         //*********************************************************
 
-        if (foundNum && (userInputLen == currentLineLen || strcmp(matchedAddress, currentLine) == 0)) {
+        if (foundNum && (userInputLen == currentLineLen || currentLineLen == matchedAddressLen)) {
 
             continue;
         }

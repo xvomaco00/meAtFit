@@ -9,4 +9,4 @@
 
 > The goal of the project is to create a program that emulates the algorithm for calculating the enable and disable keys on the virtual keyboard navigation. The input to the program is data of known addresses and a user-supplied string. The output of the program will contain the characters to be enabled on the keyboard.
 
-The full text of the input can be found [here](ASSIGNMENT.md).
+The full text of the assignment can be found [here](ASSIGNMENT.md).
